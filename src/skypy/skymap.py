@@ -1,15 +1,25 @@
 from skypy.utils import load_config, package_directory
-from loguru import logger as log
 
+from loguru import logger as log
+from astropy.coordinates import SkyCoord
+from sklearn.model_selection import train_test_split
+from mpl_toolkits.basemap import Basemap
+
+import matplotlib as mpl
+import xgboost as xgb
+import astropy.units as u
 import pandas as pd
 import numpy as np
+import warnings
+import healpy as hp
 
 
 class SkyModel():
     """A class to train and test sky models using HST data
 
     """
-    def __init__():
+
+    def __init__(self):
         """Simple init to load config and shared attributes
 
         Inputs:
@@ -23,7 +33,8 @@ class SkyModel():
             out_dict (dict): dictionary of fluxes etc for each filter after processing
         """
         # load config
-        self.config = load_config(package_directory() + "/config/mlconfig.yaml")
+        config_path = package_directory(local_path='config', filename='mlconfig.yaml')
+        self.config = load_config(config_path)
 
         # load data from wonderful people at STScI
         with_zodi_model = pd.read_csv(self.config['data_clean']['data_path'])
@@ -74,13 +85,13 @@ class SkyModel():
 
         # for diagnosis of issues, you can sigma clip if you like
         if self.config['data_clean']['sigma_clip']:
-            for key, value in out_dict.items()
+            for key, value in out_dict.items():
 
-            out_dict[key] = value[(value['sky_sb'] == list(sigma_clip(value['sky_sb'],
-                                                                      sigma=sigma,
-                                                                      maxiters=5)))]
-            else:
-                log.info("Sigma clipping data")
+                out_dict[key] = value[(value['sky_sb'] == list(sigma_clip(value['sky_sb'],
+                                                                          sigma=sigma,
+                                                                          maxiters=5)))]
+        else:
+            log.info("Not sigma clipping data")
 
         self.data_dictionary = out_dict
 
@@ -103,15 +114,16 @@ class SkyModel():
 
         training_data = self.data_dictionary[hst_filter]
         predictors = training_data[self.config['predictors']]
+        self.hst_filter = hst_filter
 
         # set the labaled data to predict
         sky_background = training_data[self.config['label']]
 
         # do a test train slipt
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
+        self._X_train, self._X_test, self._y_train, self._y_test = train_test_split(
             predictors, sky_background, test_size=test_set_size, random_state=random_state)
 
-    def model_trainer(self, x_training_data, y_training_data):
+    def train(self, x_training_data=False, y_training_data=False):
         """Train an xgboost model
 
         Inputs:
@@ -119,117 +131,166 @@ class SkyModel():
             x_training_data (pandas.core.frame.DataFrame): the training data - predictors
             y_training_data (pandas.core.frame.DataFrame): the labled data - sky backgrounds
         """
+
         # init an xgboost regression model
         xg_reg = xgb.XGBRegressor(objective='reg:squarederror',
-                                  n_estimators=10000,
-                                  learning_rate=0.01,
-                                  early_stopping_rounds=20)
+                                  n_estimators=self.config['model_params']['n_estimators'],
+                                  learning_rate=self.config['model_params']['learning_rate'],
+                                  early_stopping_rounds=self.config['model_params']['early_stopping_rounds'],
+                                  verbose=0)
 
         # fit the model to the training data
-        xg_reg.fit(x_training_data, y_training_data)
+        if x_training_data:
+            xg_reg.fit(x_training_data, y_training_data, verbose=0)
+        else:
+            log.info("Using pre-calculated training data")
+            xg_reg.fit(self._X_train, self._y_train, verbose=0)
 
         self.model = xg_reg
 
-    def get_prediction(self,
-                       learner,
-                       exp_time,
-                       g_lat,
-                       g_long,
-                       moon,
-                       limb,
-                       sun_alt,
-                       sun_angle):
-        """Use the learner to predict the sky background values for some test data,
+    def predict(self,
+                type,
+                exp_time,
+                moon_angle,
+                limb_angle,
+                sun_alt,
+                sun_angle,
+                gal_lat,
+                gal_long,
+                n_samples=None,
+                average=False,
+                plot=False,
+                low_lim=False,
+                high_lim=False):
+        """Use the learner to predict the sky background values for some test data
+
+        Inputs:
+        ------
+            type (str): can be "allsky" or "field". This will specifiy if the whole sky is sampled, or just a specific field
+            exp_time (float): exposure time (s)
+            g_lat (float): galatic latitude (deg). If type = allsky, set to False
+            g_long (float): galatic longiude (deg). If type = allsky, set to False
+            moon_angle (float): angle between moon and field (deg)
+            limb_angle (float): angle between Earth's limb and field (deg)
+            sun_alt (float): sun altitude (deg)
+            sun_angle (float): sun angle (deg)
+            n_samples (float): how many subsamples to create on an allsky grid (if allsky is selected)if this is too low the plot will look odd due to the random sampling
+            average (bool): if average = True, 10 iteration will be calculated with randomly sampled points and the result will be averaged
+            plot (bool): if true will plot the output
+            low_lim (float): cbar lower lim for plot
+            high_lim (float): cbar upper lim for plot
+
+        Outputs:
+        -------
+            single_field_prediction (astropy.units): the predicted single field sky brightness
+            multi_field_prediciton (astropy.units): the predicted total sky brightness # check
 
         """
+        # single field predicition
+        if type == "field":
+            # put into xgboost format
+            X_test = pd.DataFrame({'EXPTIME': [exp_time],
+                                   'GLAT_REF': [gal_lat],
+                                   'GLON_REF': [gal_long],
+                                   'LOS_MOON': [moon_angle],
+                                   'Earth Limb Angle Range (deg):LOS_LIMB': [limb_angle],
+                                   'SUN_ALT': [sun_alt],
+                                   'SUNANGLE': [sun_angle]})
+            # predict
+            single_field_prediction = self.model.predict(X_test)
 
-        X_test = pd.DataFrame({'EXPTIME': exp_time,
-                               'GLAT_REF': g_lat,
-                               'GLON_REF': g_long,
-                               'LOS_MOON': moon,
-                               'Earth Limb Angle Range (deg):LOS_LIMB': limb,
-                               'SUN_ALT': sun_alt,
-                               'SUNANGLE': sun_angle})
+            return(single_field_prediction[0]*u.MJy * u.sr**-1)
 
-        pred = learner.predict(X_test)
-        return(pred, X_test)
+        # allsky predicition
+        elif type == "allsky":
 
-    def get_surface_brightnes_map(self, number=40, filters='F814W', wheel="FILTER2", exp_time=1000, moon=60, limb=80, sun_alt=-10, sun_angle=50):
+            if not average:
 
-        x_training_data, x_testing_data, y_training_data, y_testing_data = prepare_training_data(training_data=with_zodi_model,
-                                                                                                 test_set_size=0.1,
-                                                                                                 random_state=123)
+                log.info("Just doing one run, no average")
 
-        learner = model_trainer(x_training_data, y_training_data)
+                # create a randomly sampled grid on the sky of n_samples size
+                lats_to_use = np.random.uniform(-90, 90, size=(n_samples))
+                longs_to_use = np.random.uniform(-180, 180, size=(n_samples))
 
-        lats_to_use = np.random.uniform(-90, 90, size=(number))
-        longs_to_use = np.random.uniform(-180, 180, size=(number))
-        flux_list = []
-        for i in np.arange(0, number):
-            exp_time = exp_time
-            g_lat = lats_to_use[i]
-            g_long = longs_to_use[i]
-            moon = moon
-            limb = limb
-            sun_alt = sun_alt
-            sun_angle = sun_angle
+                # for each sample make a prediction
+                hst_flux_list = []
+                for i in np.arange(0, n_samples):
+                    g_lat = lats_to_use[i]
+                    g_long = longs_to_use[i]
+                    hst_flux_prediction = self.model.predict(pd.DataFrame({'EXPTIME': [exp_time],
+                                                                           'GLAT_REF': [g_lat],
+                                                                           'GLON_REF': [g_long],
+                                                                           'LOS_MOON': [moon_angle],
+                                                                           'Earth Limb Angle Range (deg):LOS_LIMB': [limb_angle],
+                                                                           'SUN_ALT': [sun_alt],
+                                                                           'SUNANGLE': [sun_angle]}))
+                    hst_flux_list.append(hst_flux_prediction[0])
 
-            hst_flux, params = get_prediction(learner=learner,
-                                              exp_time=[exp_time],
-                                              g_lat=[g_lat],
-                                              g_long=[g_long],
-                                              moon=[moon],
-                                              limb=[limb],
-                                              sun_alt=[sun_alt],
-                                              sun_angle=[sun_angle])
-            flux_list.append(hst_flux)
+                self.multi_field_prediciton = hst_flux_list
+                return(self.multi_field_prediciton)
 
-        fluxes = []
-        for i in flux_list:
-            fluxes.append(i[0])
+            else:
 
-        return(fluxes, lats_to_use, longs_to_use, x_training_data, x_testing_data)
+                log.info("Doing 10 runs, will take the average")
+                # uniform grid to resample the random points (random points ensure lack of bias)
+                xi = np.linspace(-180, 180, n_samples)
+                yi = np.linspace(-90, 90, n_samples)
+                flux_arrays = []
+                for i in np.arange(0, 10):
 
-    def interpolate(self, wheel, filters, exptime, moon, limb, sun_alt, sun_angle):
-        flux_arrays_filter = []
-        for i in np.arange(0, 10):
+                    # create a randomly sampled grid on the sky of n_samples size
+                    self._lats_to_use = np.random.uniform(-90, 90, size=(n_samples))
+                    self._longs_to_use = np.random.uniform(-180, 180, size=(n_samples))
 
-            flux_filter, lats_filter, longs_filter, training_filter, testing_filter = get_surface_brightnes_map(number=1000,
-                                                                                                                filters=filters,
-                                                                                                                wheel=wheel,
-                                                                                                                exp_time=exptime,
-                                                                                                                moon=moon,
-                                                                                                                limb=limb,
-                                                                                                                sun_alt=sun_alt,
-                                                                                                                sun_angle=sun_angle)
-            xi = np.linspace(-180, 180, 100)
-            yi = np.linspace(-90, 90, 100)
-            new_filter_fluxes = []
-            for i in flux_filter:
-                new_filter_fluxes.append(np.float(i))
-            # # Linearly interpolate the data (x, y) on a grid defined by (xi, yi).
-            triang1 = tri.Triangulation(longs_filter, lats_filter)
-            interpolator1 = tri.LinearTriInterpolator(triang1, new_filter_fluxes)
-            Xi1_filter, Yi1_filter = np.meshgrid(xi, yi)
-            zi1_filter = interpolator1(Xi1_filter, Yi1_filter)
+                    # for each sample made a prediction
+                    hst_flux_list = []
+                    for i in np.arange(0, n_samples):
+                        # we don't loop over j and i, because they are random points, not a meshgrid (yet)
+                        g_lat = self._lats_to_use[i]
+                        g_long = self._longs_to_use[i]
+                        hst_flux_prediction = self.model.predict(pd.DataFrame({'EXPTIME': [exp_time],
+                                                                               'GLAT_REF': [g_lat],
+                                                                               'GLON_REF': [g_long],
+                                                                               'LOS_MOON': [moon_angle],
+                                                                               'Earth Limb Angle Range (deg):LOS_LIMB': [limb_angle],
+                                                                               'SUN_ALT': [sun_alt],
+                                                                               'SUNANGLE': [sun_angle]}))
+                        # remove list stuff
+                        hst_flux_list.append(hst_flux_prediction[0])
 
-        flux_arrays_filter.append(zi1_filter)
+                    # just ensure everything is a float for numpy
+                    new_hst_fluxes = []
+                    for i in hst_flux_list:
+                        new_hst_fluxes.append(np.float(i))
 
-    def plot_projection(self, xi, yi):
+                    # linearly interpolate the data (x, y) on a grid defined by (xi, yi).
+                    triang1 = mpl.tri.Triangulation(self._longs_to_use, self._lats_to_use)
+                    interpolator1 = mpl.tri.LinearTriInterpolator(triang1, new_hst_fluxes)
+                    Xi1, Yi1 = np.meshgrid(xi, yi)
+                    zi1 = interpolator1(Xi1, Yi1)
+                    flux_arrays.append(zi1)
 
-    new_814_fluxes = []
-    for i in flux_F814W:
-        new_814_fluxes.append(np.float(i))
-        Xi1_f814w, Yi1_f814w = np.meshgrid(xi, yi)
-        zi1_f814w = interpolator1(Xi1_f814w, Yi1_f814w)
+                if plot:
+                    log.info("Plotting output")
+                    norm = mpl.colors.Normalize(vmin=low_lim, vmax=high_lim)
+                    m = Basemap(projection='moll', lon_0=360, resolution='c')
+                    # get the average of the looped arrays
+                    colormesh = m.contourf(Xi1, Yi1, np.average(
+                        flux_arrays, axis=0), 30, cmap='magma', latlon=True, norm=norm)
+                    cbar = mpl.pyplot.colorbar(colormesh, shrink=0.8, label='Sky SB MJy/sr',
+                                               norm=norm, orientation='horizontal')
+                    cbar.set_clim(low_lim, high_lim)
 
-        norm = mpl.colors.Normalize(vmin=0.1, vmax=0.4)
-        m = Basemap(projection='moll', lon_0=360, resolution='c')
-        colormesh = m.contourf(Xi1_f814w, Yi1_f814w, np.average(
-            flux_arrays_f814w, axis=0), 30, cmap='magma', latlon=True, norm=norm)
-        cbar = plt.colorbar(colormesh, shrink=0.8, label='Sky SB MJy/sr',
-                            norm=norm, orientation='horizontal')
-        cbar.set_clim(0.1, 0.4)
+                    mpl.pyplot.title(self.hst_filter)
+                    mpl.pyplot.axis("off")
+                    mpl.pyplot.savefig(self.config['saveloc'])
 
-        plt.title('F814W')
-        plt.axis("off")
+                else:
+                    log.info("Not plotting output")
+                    return(np.average(flux_arrays, axis=0))
+
+        else:
+            warnings.error("Incorrect type input, only accepts 'allsky' or 'field'")
+
+    def save_healpix():
+        pass

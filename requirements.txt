@@ -17,3 +17,4 @@ sklearn
 datetime
 netcdf4
 ephem
+healpy

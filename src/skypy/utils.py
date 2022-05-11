@@ -1,9 +1,10 @@
 import yaml
 import os
+import skypy
 
 
 def load_config(config_path):
-    """a general yaml config parser
+    """A general yaml config parser
 
     Inputs:
     ------
@@ -13,17 +14,23 @@ def load_config(config_path):
     -------
         config_dictionary(dict): a dictionary of the config file
     """
-   with open(config_path) as open_file:
+    with open(config_path) as open_file:
         config_dictionary = yaml.safe_load(open_file)
     return(config_dictionary)
 
 
-def package_directory():
-    """get the directory where package is installed for data 
+def package_directory(local_path, filename):
+    """Get the directory where package is installed for data
+
+    Inputs:
+    ------
+        local_path (str): path to file inside package
+        filename (str): name of file
 
     Returns:
     -------
-        package_general_path (str): path to installation of package
+        full_path (str): full path on users system to any file in package
     """
-    package_general_path = os.path.abspath(skypy.__file__)
-    return(package_general_path[:-11])
+    file_path = os.path.dirname(os.path.realpath(__file__))
+    full_path = os.path.join(file_path, local_path, filename)
+    return(full_path)
