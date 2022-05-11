@@ -1,0 +1,40 @@
+bad_fields:
+  - "ORIMOS",
+  - "GOSSAMER",
+  - "M-51",
+  - "OMEGACEN",
+  - "BE-2",
+  - "BE-1",
+  - "HD39060",
+  - "M-31",
+  - "SN-2012EC",
+  - "ORI-PARALLAX2",
+  - "ORI-PARALLAX1",
+  - "SN2004AM",
+  - "MESSIER",
+  - "M-92",
+  - "BULGE",
+  - "SWEEPS",
+  - "HD",
+  - "UNKNOWN-TARGET-1",
+  - "MJ257"
+
+predictors:
+  - 'EXPTIME'
+  - 'GLAT_REF'
+  - 'LOS_MOON'
+  - 'Earth Limb Angle Range (deg):LOS_LIMB'
+  - 'SUN_ALT'
+  - 'SUNANGLE'
+
+label: sky_sb
+
+model_params:
+  learning_rate: 0.01
+  early_stopping_rounds: 20
+  n_estimators: 10000
+
+data_clean:
+  sigma_clip: False
+  clip_galatic: False
+  data_path: "/Users/physarah/Important/Working_Desktop/zodi_no_excel.csv"
