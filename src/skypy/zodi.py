@@ -24,17 +24,16 @@ class SkyModel():
 
         Inputs:
         ------
-            data_path (str): path to csv file
-            g_clip (float): +- in degrees to clip on the galatic plane. If False, there is no clip
-            sigma (float): How many outliars to clips. If False, no clip
+            data_path (str): path to csv file (defined in config)
+            g_clip (float): +- in degrees to clip on the galatic plane. If False, there is no clip (defined in config)
+            sigma (float): How many outliars to clips. If False, no clip (defined in config)
 
         Returns:
         -------
             out_dict (dict): dictionary of fluxes etc for each filter after processing
         """
         # load config
-        config_path = package_directory(local_path='config', filename='mlconfig.yaml')
-        self.config = load_config(config_path)
+        self.config = load_config('general')
 
         # load data from wonderful people at STScI
         with_zodi_model = pd.read_csv(self.config['data_clean']['data_path'])
@@ -283,7 +282,8 @@ class SkyModel():
 
                     mpl.pyplot.title(self.hst_filter)
                     mpl.pyplot.axis("off")
-                    mpl.pyplot.savefig(self.config['saveloc'])
+                    mpl.show()
+                    # mpl.pyplot.savefig() # can uncomment and save if you like
 
                 else:
                     log.info("Not plotting output")

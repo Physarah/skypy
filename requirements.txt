@@ -18,3 +18,4 @@ datetime
 netcdf4
 ephem
 healpy
+pytest

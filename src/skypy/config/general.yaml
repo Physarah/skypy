@@ -40,4 +40,4 @@ data_clean:
   clip_galatic: False
   data_path: "/Users/physarah/Important/Working_Desktop/zodi_no_excel.csv"
 
-saveloc: "/Users/physarah/Desktop/figure1.png"
+PYSYN_CDBS: "/Volumes/CODE/Hubble/grp/hst/cdbs"

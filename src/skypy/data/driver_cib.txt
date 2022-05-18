@@ -1,0 +1,9 @@
+# row1= IGL(best-fit)
+# row2= pivot wavelength (micron)
+# row3= COIB limit nW m-2 sr-1
+# row4= filter bandpass (micron) using EAZY FILTER table w95 values and W_eff from: http://svo2.cab.inta-csic.es/svo/theory/fps/index.php?mode=browse&gname=Herschel&gname2=Pacs
+#   FUV        NUV u     g     r      i      z       Y    J       H      K       IRAC-1 IRAC-2 IRAC-4 MIPS24 MIPS70 PACS100 PACS160 PACS160a SPIRE250 SPIRE350 SPIRE500
+1.45 3.15 4.03 5.36 7.47 9.55 10.15 10.44 10.38 10.12 8.72 5.17 3.60 2.45 3.01 6.90 10.22 16.47 13.14 10.00 5.83 2.46
+0.153 0.225 0.356  0.470  0.618  0.749  0.895  1.021  1.252  1.643  2.150  3.544  4.487  7.841 23.675 70.890 101.000 161.000 161.000 249.000 357.000 504.00
+1.36 2.86 3.41 5.05 7.29 9.35 9.98 10.23 10.22 9.99 8.57 5.03 3.47 1.49 2.47 5.68 8.94 10.85 8.93 8.18 4.66 1.71
+    .03724 .09254 .0695 .13305 .11774 .12979 .19603 .10257 .17031 .28439 .31087 .71392 .97055 2.78928 8.      37.    31.286  69.76   69.76  67.61550 95.75604 185.67213
