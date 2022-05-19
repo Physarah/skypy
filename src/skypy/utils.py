@@ -24,6 +24,22 @@ def load_config(config_file):
         return(outdict)
 
 
+def load_yaml(path):
+    """
+    Load yaml file
+
+    Params:
+        path: str
+            yaml file path
+    """
+    with open(path, 'r') as stream:
+        try:
+            outdict = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+        return(outdict)
+
+
 def package_directory(local_path, filename):
     """Get the directory where package is installed for data
 
