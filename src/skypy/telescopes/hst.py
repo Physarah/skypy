@@ -167,6 +167,20 @@ def calc_total_signal_noise(total_countrate,
     return(signal, noise)
 
 
+def calculate_hubble_location_function(tle_line_1, tle_line_2, observation_time, help_bool=False):
+    hubble_object = ephem.readtle('HST', tle_line_1, tle_line_2)
+    hubble_object.compute(observation_time)
+    rad_hubble_longitude = hubble_object.sublong  # Longitude (+E) beneath satellite
+    rad_hubble_latitude = hubble_object.sublat  # Latitude (+N) beneath satellite
+    if help_bool:
+        print(help(rad_hubble_longitude))
+        print(help(rad_hubble_latitude))
+    deg_hubble_long = np.rad2deg(rad_hubble_longitude)
+    deg_hubble_lat = np.rad2deg(rad_hubble_latitude)
+    dicts_pos = {"Longitude": deg_hubble_long, "Latitude": deg_hubble_lat}
+    return(dicts_pos)
+
+
 def calc_hst_signal_noise(count_rate,
                           exp_time,
                           num_sub_exposures=1,
@@ -720,6 +734,62 @@ def get_hst_ceres_fluxes_hourly(hst_obs, correct_tle, data_frame_organised):
     mid_pos = hst_obs.calculate_hubble_location(correct_tle[0], correct_tle[1], hst_obs.mid_times)
 
     data_frame_organised['Altitude'] = [hst_obs.telescope_altitude.value] * \
+        len(data_frame_organised['Latitude'])
+    data_frame_organised['HST Latitude Start'] = [
+        start_pos['Latitude']]*len(data_frame_organised['Latitude'])
+    data_frame_organised['HST Longitude Start'] = [
+        start_pos['Longitude']]*len(data_frame_organised['Latitude'])
+    data_frame_organised['HST Latitude Mid'] = [
+        mid_pos['Latitude']]*len(data_frame_organised['Latitude'])
+    data_frame_organised['HST Longitude Mid'] = [
+        mid_pos['Longitude']]*len(data_frame_organised['Latitude'])
+    data_frame_organised['HST Latitude End'] = [
+        end_pos['Latitude']]*len(data_frame_organised['Latitude'])
+    data_frame_organised['HST Longitude End'] = [
+        end_pos['Longitude']]*len(data_frame_organised['Latitude'])
+
+    fluxes_in_start = select_fluxes_in_radius_of_influence(ceres_lon=np.array(data_frame_organised['Longitude']),
+                                                           ceres_lat=np.array(
+                                                               data_frame_organised['Latitude']),
+                                                           ceres_flux=np.array(
+                                                               data_frame_organised['Variable']),
+                                                           hst_lon=np.array(
+        data_frame_organised['HST Longitude Start']),
+        hst_lat=np.array(
+        data_frame_organised['HST Latitude Start']),
+        hst_altitude=np.array(data_frame_organised['Altitude'])*u.km)
+
+    fluxes_in_end = select_fluxes_in_radius_of_influence(ceres_lon=np.array(data_frame_organised['Longitude']),
+                                                         ceres_lat=np.array(
+                                                             data_frame_organised['Latitude']),
+                                                         ceres_flux=np.array(
+                                                             data_frame_organised['Variable']),
+                                                         hst_lon=np.array(
+        data_frame_organised['HST Longitude End']),
+        hst_lat=np.array(data_frame_organised['HST Latitude End']),
+        hst_altitude=np.array(data_frame_organised['Altitude'])*u.km)
+
+    fluxes_in_mid = select_fluxes_in_radius_of_influence(ceres_lon=np.array(data_frame_organised['Longitude']),
+                                                         ceres_lat=np.array(
+                                                             data_frame_organised['Latitude']),
+                                                         ceres_flux=np.array(
+                                                             data_frame_organised['Variable']),
+                                                         hst_lon=np.array(
+        data_frame_organised['HST Longitude Mid']),
+        hst_lat=np.array(data_frame_organised['HST Latitude Mid']),
+        hst_altitude=np.array(data_frame_organised['Altitude'])*u.km)
+
+    return(fluxes_in_start, fluxes_in_end, fluxes_in_mid)
+
+
+def get_hst_ceres_fluxes_hourly_no_class(start, mid, end, correct_tle, data_frame_organised, telescope_altitude):
+
+    start_pos = calculate_hubble_location_function(
+        correct_tle[0], correct_tle[1], start)
+    end_pos = calculate_hubble_location_function(correct_tle[0], correct_tle[1], end)
+    mid_pos = calculate_hubble_location_function(correct_tle[0], correct_tle[1], mid)
+
+    data_frame_organised['Altitude'] = [telescope_altitude] * \
         len(data_frame_organised['Latitude'])
     data_frame_organised['HST Latitude Start'] = [
         start_pos['Latitude']]*len(data_frame_organised['Latitude'])
