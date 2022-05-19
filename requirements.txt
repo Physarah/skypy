@@ -19,3 +19,5 @@ netcdf4
 ephem
 healpy
 pytest
+pyhdf
+pydap

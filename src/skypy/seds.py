@@ -4,10 +4,10 @@ import numpy as np
 import pandas as pd
 import astropy.units as u
 import gunagala.sky as skies
-import skypy.sky as custom_skies
+import skypy.skymods.gunagala as custom_skies
+import skypy.telescopes.hst as hst
 from gunagala.utils import ensure_unit
 from skypy.utils import package_directory
-from skypy.telescope import renorm_to_hst_filter
 from astropy.time import Time
 
 
@@ -65,14 +65,14 @@ def get_zodi_SED(scale='none', zodi_norm_filter='acs,wfc1,f606w'):
                         (u.arcsecond**2 * u.cm**2 * u.s * u.Angstrom))
         else:
             raise u.UnitsError(f'{normunits} not available in pysynphot')
-        hubble_zodi_photon_flam_arcsec2_normalised = renorm_to_hst_filter(zodi_photon_flam_arcsec2,
-                                                                          zodi_waves_A,
-                                                                          zodi_norm_filter,
-                                                                          normalization,
-                                                                          waveunits='angstrom',
-                                                                          fluxunits='photlam',
-                                                                          normunits=normunits,
-                                                                          surface_brightness=True)
+        hubble_zodi_photon_flam_arcsec2_normalised = hst.renorm_to_hst_filter(zodi_photon_flam_arcsec2,
+                                                                              zodi_waves_A,
+                                                                              zodi_norm_filter,
+                                                                              normalization,
+                                                                              waveunits='angstrom',
+                                                                              fluxunits='photlam',
+                                                                              normunits=normunits,
+                                                                              surface_brightness=True)
 
         return(zodi_waves_A, hubble_zodi_photon_flam_arcsec2_normalised)
     else:
@@ -134,14 +134,14 @@ def get_zodi_SED_with_reddening(red_param, blue_param, scale='none', zodi_norm_f
                         (u.arcsecond**2 * u.cm**2 * u.s * u.Angstrom))
         else:
             raise u.UnitsError(f'{normunits} not available in pysynphot')
-        hubble_zodi_photon_flam_arcsec2_normalised = renorm_to_hst_filter(zodi_photon_flam_arcsec2,
-                                                                          zodi_waves_A,
-                                                                          zodi_norm_filter,
-                                                                          normalization,
-                                                                          waveunits='angstrom',
-                                                                          fluxunits='photlam',
-                                                                          normunits=normunits,
-                                                                          surface_brightness=True)
+        hubble_zodi_photon_flam_arcsec2_normalised = hst.renorm_to_hst_filter(zodi_photon_flam_arcsec2,
+                                                                              zodi_waves_A,
+                                                                              zodi_norm_filter,
+                                                                              normalization,
+                                                                              waveunits='angstrom',
+                                                                              fluxunits='photlam',
+                                                                              normunits=normunits,
+                                                                              surface_brightness=True)
 
         return(zodi_waves_A, hubble_zodi_photon_flam_arcsec2_normalised)
     else:
@@ -204,14 +204,14 @@ def get_CIB(delta_wavelength_angstrom=1.,
     if normalization is not None:
         ensure_unit(normalization, u.photon /
                     (u.arcsecond**2 * u.cm**2 * u.s * u.Angstrom))
-        interp_photon = renorm_to_hst_filter(interp_photon,
-                                             interp_waves,
-                                             normalization_filtername,
-                                             normalization,
-                                             surface_brightness=True,
-                                             waveunits='angstrom',
-                                             fluxunits='photlam',
-                                             normunits='photlam')
+        interp_photon = hst.renorm_to_hst_filter(interp_photon,
+                                                 interp_waves,
+                                                 normalization_filtername,
+                                                 normalization,
+                                                 surface_brightness=True,
+                                                 waveunits='angstrom',
+                                                 fluxunits='photlam',
+                                                 normunits='photlam')
     return(interp_waves, interp_photon)
 
 
@@ -363,14 +363,14 @@ def get_scattered_earthshine_SED(scattering_angle, altitude, scale='none', earth
                         (u.arcsecond**2 * u.cm**2 * u.s * u.Angstrom))
         else:
             raise u.UnitsError(f'{normunits} not available in pysynphot')
-        hubble_zodi_photon_flam_arcsec2_normalised = renorm_to_hst_filter(zodi_photon_flam_arcsec2,
-                                                                          zodi_waves_A,
-                                                                          earth_norm_filter,
-                                                                          normalization,
-                                                                          waveunits='angstrom',
-                                                                          fluxunits='photlam',
-                                                                          normunits=normunits,
-                                                                          surface_brightness=True)
+        hubble_zodi_photon_flam_arcsec2_normalised = hst.renorm_to_hst_filter(zodi_photon_flam_arcsec2,
+                                                                              zodi_waves_A,
+                                                                              earth_norm_filter,
+                                                                              normalization,
+                                                                              waveunits='angstrom',
+                                                                              fluxunits='photlam',
+                                                                              normunits=normunits,
+                                                                              surface_brightness=True)
 
         return(zodi_waves_A, hubble_zodi_photon_flam_arcsec2_normalised)
     else:
@@ -407,14 +407,14 @@ def get_rayleigh_Earthshine(scattering_angle, altitude, zodi_norm_filter, normal
                     (u.arcsecond**2 * u.cm**2 * u.s * u.Angstrom))
     else:
         raise u.UnitsError(f'{normunits} not available in pysynphot')
-    normalised_rayleigh = renorm_to_hst_filter(stuff,
-                                               waves_e,
-                                               zodi_norm_filter,
-                                               normalization,
-                                               waveunits='angstrom',
-                                               fluxunits='photlam',
-                                               normunits=normunits,
-                                               surface_brightness=True)
+    normalised_rayleigh = hst.renorm_to_hst_filter(stuff,
+                                                   waves_e,
+                                                   zodi_norm_filter,
+                                                   normalization,
+                                                   waveunits='angstrom',
+                                                   fluxunits='photlam',
+                                                   normunits=normunits,
+                                                   surface_brightness=True)
     return(waves_e, normalised_rayleigh)
 
 
