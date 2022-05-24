@@ -1,21 +1,20 @@
-astropy
-matplotlib
+astropy == 5.0.4
+matplotlib == 3.5.1
 git+https://github.com/AstroHuntsman/gunagala.git
-pandas
-numpy
-scipy
-photutils
-specutils
-astroquery
-pyyaml
+pandas == 1.4.2
+numpy == 1.22.3
+scipy == 1.7.3
+photutils == 1.4.0
+specutils == 1.7.0
+astroquery == 0.4.6
+pyyaml == 6.0
 pysynphot
-xmltodict
-sklearn
+xmltodict == 0.13.0
+sklearn == 1.0.2
 datetime
-netcdf4
-ephem
-healpy
-pytest
+netcdf4 == 1.5.8
+ephem == 4.1.3
+pytest == 7.1.2
 pyhdf
 pydap
 loguru
