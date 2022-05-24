@@ -11,7 +11,6 @@ import astropy.units as u
 import pandas as pd
 import numpy as np
 import warnings
-import healpy as hp
 
 
 class XGBoostSkyModel():

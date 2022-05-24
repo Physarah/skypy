@@ -1,4 +1,3 @@
-xgboost
 astropy
 matplotlib
 git+https://github.com/AstroHuntsman/gunagala.git
@@ -10,9 +9,7 @@ specutils
 astroquery
 pyyaml
 pysynphot
-xml
 xmltodict
-urllib
 sklearn
 datetime
 netcdf4
@@ -21,3 +18,4 @@ healpy
 pytest
 pyhdf
 pydap
+loguru

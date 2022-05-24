@@ -3,7 +3,7 @@ import pandas as pd
 import datetime
 import numpy as np
 import warnings
-from earthwatch.utils.general import (
+from skypy.utils import (
     get_tle_archive_path, get_tle_storage_path, dump_dictionary_to_yaml)
 
 

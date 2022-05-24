@@ -38,6 +38,6 @@ model_params:
 data_clean:
   sigma_clip: False
   clip_galatic: False
-  data_path: "/Users/physarah/Important/Working_Desktop/zodi_no_excel.csv"
+  data_path: "/Users/physarah/Development/skypy/src/skypy/data/hst_skybackgrounds.csv"
 
 PYSYN_CDBS: "/Volumes/CODE/Hubble/grp/hst/cdbs"
