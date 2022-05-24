@@ -2,8 +2,6 @@
 
 Skypy is a python package that is designed to make is easier to predict the intensity of the sky as observed from low Earth orbit.
 
-You will also need to download the HST calibration files (CBDS) and set the path to these in the config/general.yaml which can be found at the above link. Zodi XGBoost models can be accessed in the repo without the need for the CBDS.
-
 ## Installation 
 
 This software has been tested in python 3.8 in macOS 10.14.6 in an anaconda environment (4.10.1)
@@ -46,10 +44,16 @@ To start the jupyter-notebook, type `jupyter-notebook` in your terminal, in the 
 
 ## Config Files 
 
-There is one set of config files not included in this repo that you will need to download if you want to produce SED's and sky backgrounds for HST, and that is the HST CDBS.
+There is one set of config files not included in this repo that you will need to download if you want to produce SED's and sky backgrounds for HST, and that is the HST CDBS. You can find them at https://archive.stsci.edu/hlsps/reference-atlases/cdbs/
 
-Once you have downloaded the file, point the package to where it is installed by editing the `general.yaml` file, using the PYSYN_CDBS keyword. E.g.:
+If these ever disapear, you can contact the author of this software package for a coby of the originals. It has not been included on this repo because they total about 4GB. 
+
+Once you have downloaded the file, point the package to where it is stored by editing the `general.yaml` file, using the PYSYN_CDBS keyword. E.g.:
 ```
 PYSYN_CDBS: "/Volumes/CODE/Hubble/grp/hst/cdbs"
 ```
-In `general.yaml` you can also point to a csv vist HST sky backgrounds for processing large amounts of data. An example file is given in the repo under `.../src/skypy/data/MDRIZSKY.csv`
+In `general.yaml` add the path to the example data provided in `.../src/skypy/data/hst_skybackgrounds.csv`
+
+```
+data_path: "/Users/physarah/Development/skypy/src/skypy/data/hst_skybackgrounds.csv"
+```
