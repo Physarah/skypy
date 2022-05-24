@@ -2,8 +2,6 @@
 
 Skypy is a python package that is designed to make is easier to predict the intensity of the sky as observed from low Earth orbit.
 
-There are a few prerequisites for the package and things you will need to install apart from what is in the requirements.txt. These are:
-
 You will also need to download the HST calibration files (CBDS) and set the path to these in the config/general.yaml which can be found at the above link. Zodi XGBoost models can be accessed in the repo without the need for the CBDS.
 
 ## Installation 
@@ -39,4 +37,19 @@ Note: this package is depreciated, so this will install the last version which i
 
 Pysynphot https://pysynphot.readthedocs.io/en/latest/ has also depreciated, but the correct version (2.0.0) can be installed via the requirements.txt with pip. 
 
+To run the jupyter notebook examples, you can install jupyter via conda
+```
+conda install jupyter
+```
 
+To start the jupyter-notebook, type `jupyter-notebook` in your terminal, in the skypy environment where the above dependancies are installed
+
+## Config Files 
+
+There is one set of config files not included in this repo that you will need to download if you want to produce SED's and sky backgrounds for HST, and that is the HST CDBS.
+
+Once you have downloaded the file, point the package to where it is installed by editing the `general.yaml` file, using the PYSYN_CDBS keyword. E.g.:
+```
+PYSYN_CDBS: "/Volumes/CODE/Hubble/grp/hst/cdbs"
+```
+In `general.yaml` you can also point to a csv vist HST sky backgrounds for processing large amounts of data. An example file is given in the repo under `.../src/skypy/data/MDRIZSKY.csv`
