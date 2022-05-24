@@ -105,6 +105,8 @@ class HubbleObservation(object):
             warnings.warn('The filter used in the observation is not supported, sorry')
 
     def calculate_hubble_location(self, tle_line_1, tle_line_2, observation_time, help_bool=False):
+        """get HST location from tle's
+        """
         hubble_object = ephem.readtle('HST', tle_line_1, tle_line_2)
         hubble_object.compute(observation_time)
         rad_hubble_longitude = hubble_object.sublong  # Longitude (+E) beneath satellite
