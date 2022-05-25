@@ -38,6 +38,8 @@ model_params:
 data_clean:
   sigma_clip: False
   clip_galatic: False
+# path to the data you want to process. Use hst_skybackgrounds.csv in data as an example
   data_path: "/Users/physarah/Development/skypy/src/skypy/data/hst_skybackgrounds.csv"
 
+# The location of the cdbs for hubble (see readme)
 PYSYN_CDBS: "/Volumes/CODE/Hubble/grp/hst/cdbs"

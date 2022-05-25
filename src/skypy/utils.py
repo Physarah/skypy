@@ -208,7 +208,8 @@ def get_tle_archive_path():
 
 def get_pickel_path():
     """
-    Gets the pickle path input by the user from the config file
+    Gets the pickle path input by the user from the config file.
+    This might be where you want to save the pickled data, if you are scripting things 
     """
     config = load_config('data')
     pick_path = config['pickel_directory']

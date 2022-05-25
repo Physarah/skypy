@@ -1,12 +1,10 @@
+# Some useful dict kys to set if you are scripting and running lots of data
+# If only using basic examples, this is not needed.
+
 tle_files:
-  tle_directory: "/Volumes/DATA/data_sets/DataBackup/tles/hst_tle_archive.txt"
-  tle_storage_directory: "/Volumes/DATA/data_sets/DataBackup/tles"
-raw_hst_data:
-  raw_dataset_directory: "/Volumes/DATA/data_sets/DataBackup/beta/raw_data_hubble"
-  file_to_process:
-    - "shortwave_hubble.csv"
+  tle_directory:
+  tle_storage_directory:
 raw_ceres_data:
-  raw_dataset_directory: "/Volumes/DATA/data_sets/DataBackup/beta/raw_data_ceres"
+  raw_dataset_directory:
   file_to_process:
-    - "CERES_SYN1deg-Day_Terra-Aqua-MODIS_Ed4A_Subset_20021101-20021130.nc"
-pickel_directory: "/Users/physarah/Development/earthwatch/earthwatch/notebooks/pickles"
+pickel_directory:
