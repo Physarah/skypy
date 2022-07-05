@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/490151776.svg)](https://zenodo.org/badge/latestdoi/490151776)
+
 # Skypy
 
 Skypy is a python package that is designed to make is easier to predict the intensity of the sky as observed from low Earth orbit.
